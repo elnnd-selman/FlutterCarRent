@@ -174,17 +174,55 @@ class _AdminAcceptCarScreenState extends State<AdminAcceptCarScreen> {
                               Row(
                                 children: [
                                   bottonSelect == 2
-                                      ? TextButton(
-                                          onPressed: () async {
-                                            await FireStoreServices().acceptCar(
-                                                registerCarId: data.id,
-                                                status: 'true');
+                                      ? FutureBuilder(
+                                          future: FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(data.userId)
+                                              .get(),
+                                          builder: (context,
+                                              AsyncSnapshot<DocumentSnapshot>
+                                                  snapshot) {
+                                            if (snapshot.hasError) {
+                                              return Text(
+                                                  "Something went wrong");
+                                            }
+
+                                            if (snapshot.hasData &&
+                                                !snapshot.data!.exists) {
+                                              return Text(
+                                                  "Document does not exist");
+                                            }
+
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.done) {
+                                              UserModel userModel =
+                                                  UserModel.fromJson(snapshot
+                                                          .data!
+                                                          .data()
+                                                      as Map<String, dynamic>);
+                                              return TextButton(
+                                                  onPressed: () async {
+                                                    await FireStoreServices()
+                                                        .acceptCar(
+                                                            registerCarId:
+                                                                data.id,
+                                                            status: 'true');
+
+                                                    SendMailServices.sendMail(
+                                                        userModel.email,
+                                                        'Accepted',
+                                                        'We Accepted your request, come take the car');
+                                                  },
+                                                  child: Text(
+                                                    'Accept',
+                                                    style: TextStyle(
+                                                        color: Colors.green),
+                                                  ));
+                                            }
+
+                                            return CircularProgressIndicator();
                                           },
-                                          child: Text(
-                                            'Accept',
-                                            style:
-                                                TextStyle(color: Colors.green),
-                                          ))
+                                        )
                                       : SizedBox(),
                                   bottonSelect == 1
                                       ? TextButton(
@@ -290,135 +328,6 @@ class _AdminAcceptCarScreenState extends State<AdminAcceptCarScreen> {
                   ),
                 );
               }),
-          // FutureBuilder<QuerySnapshot>(
-          //   future: FirebaseFirestore.instance
-          //       .collection('registrationCar')
-          //       .where('accept', isEqualTo: 'false')
-          //       .get(),
-          //   builder: (BuildContext context,
-          //       AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
-          //     if (snapshot.hasError) {
-          //       return const Text(
-          //         "Something went wrong",
-          //         style: TextStyle(color: Colors.white),
-          //       );
-          //     }
-
-          //     if (snapshot.connectionState == ConnectionState.done) {
-          //       List<RegistrationCarModel> data = snapshot.data!.docs
-          //           .map((e) => RegistrationCarModel.fromJson(
-          //               e.data() as Map<String, dynamic>))
-          //           .toList();
-          //       return Padding(
-          //         padding: const EdgeInsets.all(8.0),
-          //         child: Container(
-          //           padding: const EdgeInsets.all(20),
-          //           decoration: BoxDecoration(
-          //               color: Colors.blue,
-          //               borderRadius: BorderRadius.circular(30)),
-          //           height: 600,
-          //           child: ListView.builder(
-          //             itemCount: data.length,
-          //             physics: const NeverScrollableScrollPhysics(),
-          //             itemBuilder: (context, index) {
-          //               return Padding(
-          //                 padding: const EdgeInsets.all(8.0),
-          //                 child: Container(
-          //                   padding: const EdgeInsets.all(8.0),
-          //                   decoration: BoxDecoration(
-          //                       color: Colors.white,
-          //                       borderRadius: BorderRadius.circular(10)),
-          //                   child: Column(
-          //                     children: [
-          //                       Text(
-          //                         data[index].pay + ' \$',
-          //                         style: TextStyle(color: Colors.blue),
-          //                       ),
-          //                       Text(
-          //                         ' -From- ' +
-          //                             data[index].from +
-          //                             ' -To- ' +
-          //                             data[index].to,
-          //                         style: TextStyle(color: Colors.blue),
-          //                       ),
-          //                       FutureBuilder(
-          //                         future: FirebaseFirestore.instance
-          //                             .collection('cars')
-          //                             .doc(data[index].carId)
-          //                             .get(),
-          //                         builder: (context,
-          //                             AsyncSnapshot<DocumentSnapshot>
-          //                                 snapshott) {
-          //                           if (snapshott.hasError) {
-          //                             return const Text(
-          //                               "Something went wrong",
-          //                               style: TextStyle(color: Colors.white),
-          //                             );
-          //                           }
-
-          //                           if (snapshott.connectionState ==
-          //                               ConnectionState.done) {
-          //                             CardModel carData = CardModel.fromJson(
-          //                                 snapshott.data!.data()
-          //                                     as Map<String, dynamic>);
-
-          //                             return Column(
-          //                               children: [
-          //                                 Text(
-          //                                   'Name: ' + carData.name,
-          //                                   style: const TextStyle(
-          //                                     color: Colors.blue,
-          //                                   ),
-          //                                 ),
-          //                                 Text(
-          //                                   'Brand: ' + carData.brand,
-          //                                   style: const TextStyle(
-          //                                     color: Colors.blue,
-          //                                   ),
-          //                                 ),
-          //                                 Text(
-          //                                   'Model: ' + carData.model,
-          //                                   style: const TextStyle(
-          //                                     color: Colors.blue,
-          //                                   ),
-          //                                 ),
-          //                               ],
-          //                             );
-          //                           }
-          //                           return Text('have not any data');
-          //                         },
-          //                       ),
-          //                       Row(
-          //                         children: [
-          //                           TextButton(
-          //                               onPressed: () {},
-          //                               child: Text(
-          //                                 'Accept',
-          //                                 style: TextStyle(color: Colors.green),
-          //                               )),
-          //                           TextButton(
-          //                               onPressed: () {},
-          //                               child: Text(
-          //                                 'Remove',
-          //                                 style: TextStyle(color: Colors.red),
-          //                               ))
-          //                         ],
-          //                       )
-          //                     ],
-          //                   ),
-          //                 ),
-          //               );
-          //             },
-          //           ),
-          //         ),
-          //       );
-          //     }
-
-          //     return const Center(
-          //       child: CircularProgressIndicator(),
-          //     );
-          //   },
-          // )
         ],
       ),
     );

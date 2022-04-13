@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:print_color/print_color.dart';
 import '../model/carModel.dart';
 
 class RegsitrationCarScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class RegsitrationCarScreen extends StatefulWidget {
 }
 
 class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
+  bool errorCheckDate = false;
   bool errorCheck = false;
   String errorText = '';
   String _fromDate = '';
@@ -36,6 +38,10 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    popNav() {
+      Navigator.pop(context);
+    }
+
     var stream =
         FirebaseFirestore.instance.collection('cars').doc(carId).snapshots();
     return Scaffold(
@@ -284,7 +290,8 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
                         AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
                             snapshot) {
                       if (snapshot.hasData) {
-                        var registrationCars = snapshot.data!.docs
+                        List<RegistrationCarModel> registrationCars = snapshot
+                            .data!.docs
                             .map((e) => RegistrationCarModel.fromJson(e.data()))
                             .toList();
                         bool userHaveCar = registrationCars.any((element) =>
@@ -328,6 +335,15 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
                                         },
                                       ),
                                     ),
+                              if (errorCheckDate)
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text(
+                                    'car unavailable in this date time , pleas check (Not available list)',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 248, 0, 0)),
+                                  ),
+                                ),
                               Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: CustomButton(
@@ -337,9 +353,75 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
                                         ? 'You have car in registration method'
                                         : 'Register the car',
                                     ontab: () {
+                                      setState(() {
+                                        errorCheckDate = false;
+                                      });
                                       if (userHaveCar) {
                                         return;
                                       }
+                                      for (var element in registrationCars) {
+                                        //to la pesh towakan
+                                        //from la dway from
+                                        Print.yellow(element);
+                                        if ((toDateFun(_toDate).isBefore(
+                                                toDateFun(element.to)) &&
+                                            toDateFun(_toDate).isAfter(
+                                                toDateFun(element.from)))) {
+                                          setState(() {
+                                            errorCheckDate = true;
+                                          });
+                                          return;
+                                        }
+
+                                        if ((toDateFun(_fromDate).isBefore(
+                                                toDateFun(element.to)) &&
+                                            toDateFun(_fromDate).isAfter(
+                                                toDateFun(element.from)))) {
+                                          setState(() {
+                                            errorCheckDate = true;
+                                          });
+                                          return;
+                                        }
+                                        if ((toDateFun(_toDate).isAfter(
+                                                toDateFun(element.to)) &&
+                                            toDateFun(_fromDate).isBefore(
+                                                toDateFun(element.from)))) {
+                                          setState(() {
+                                            errorCheckDate = true;
+                                          });
+                                          return;
+                                        }
+                                        if ((toDateFun(_toDate).isAfter(
+                                                toDateFun(element.to)) &&
+                                            toDateFun(_fromDate).isBefore(
+                                                toDateFun(element.to)))) {
+                                          setState(() {
+                                            errorCheckDate = true;
+                                          });
+                                          return;
+                                        }
+                                        // if ((toDateFun(_toDate).isBefore(
+                                        //         toDateFun(element.to)) &&
+                                        //     toDateFun(_fromDate).isAfter(
+                                        //         toDateFun(element.from)))) {}
+                                        // //to la dway to
+                                        // //from la pesh
+                                        // if ((toDateFun(_toDate).isAfter(
+                                        //         toDateFun(element.to)) &&
+                                        //     toDateFun(_fromDate).isBefore(
+                                        //         toDateFun(element.to)))) {}
+
+                                        // if ((toDateFun(_toDate).isAfter(
+                                        //         toDateFun(element.to)) &&
+                                        //     toDateFun(_fromDate).isBefore(
+                                        //         toDateFun(element.to)))) {}
+
+                                        // if ((toDateFun(_toDate).isAfter(
+                                        //         toDateFun(element.to)) ||
+                                        //     toDateFun(_fromDate).isBefore(
+                                        //         toDateFun(element.to)))) {}
+                                      }
+
                                       if (_fromDate == '' || _toDate == '') {
                                         Fluttertoast.showToast(
                                             msg:
@@ -369,9 +451,11 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
                                                         ' to ' +
                                                         _toDate),
                                                     Text('you pay: ' +
-                                                        daysBetween(_fromDate,
-                                                                _toDate)
-                                                            .toString())
+                                                        (daysBetween(_fromDate,
+                                                                    _toDate) *
+                                                                car.moneyPerHour)
+                                                            .toString() +
+                                                        ' \$')
                                                   ],
                                                 ),
                                                 actions: [
@@ -402,7 +486,8 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
                                               carId: carId,
                                               from: _fromDate,
                                               to: _toDate);
-                                          Navigator.pop(context);
+
+                                          popNav();
                                         }
                                       });
                                     },
@@ -433,6 +518,10 @@ class _RegsitrationCarScreenState extends State<RegsitrationCarScreen> {
     // ignore: non_constant_identifier_names
     var To = DateTime.parse(to);
     return (To.difference(From).inHours / 24).round();
+  }
+
+  DateTime toDateFun(date) {
+    return DateTime.parse(date);
   }
 }
 

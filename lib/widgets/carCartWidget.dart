@@ -60,7 +60,7 @@ class CarCartWidget extends StatelessWidget {
                             children: [
                               buildRow(
                                   iconData: Icons.money,
-                                  text: car.moneyPerHour.toString() + '/h'),
+                                  text: car.moneyPerHour.toString() + '/day'),
                               buildRow(
                                   text: car.door,
                                   iconData: Icons.door_front_door)

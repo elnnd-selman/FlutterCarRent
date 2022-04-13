@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:carrent/model/carModel.dart';
 import 'package:carrent/model/userModel.dart';
 import 'package:carrent/services/auth.dart';
@@ -21,7 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // ignore: non_constant_identifier_names
   bool is_admin = false;
   String carIsRegister = '';
-
+  Stream<QuerySnapshot<Map<String, dynamic>>> stream =
+      FirebaseFirestore.instance.collection('cars').snapshots();
   isAdmin() async {
     UserModel userCheck = await AuthService().isAdmin(_user!.uid);
     if (userCheck.admin == 1) {
@@ -39,18 +42,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Stream<QuerySnapshot<Map<String, dynamic>>> stream =
-        carIsRegister == 'false'
-            ? FirebaseFirestore.instance
-                .collection('cars')
-                .where('isRegister', isEqualTo: 'false')
-                .snapshots()
-            : carIsRegister == 'true'
-                ? FirebaseFirestore.instance
-                    .collection('cars')
-                    .where('isRegister', isEqualTo: 'true')
-                    .snapshots()
-                : FirebaseFirestore.instance.collection('cars').snapshots();
+    List<Map> logoBrand = [
+      {
+        "logo":
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Republic_Of_Korea_Broadcasting-TV_Rating_System%28ALL%29.svg/1200px-Republic_Of_Korea_Broadcasting-TV_Rating_System%28ALL%29.svg.png',
+        'text': 'all'
+      },
+      {
+        "logo":
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Mercedes-Logo.svg/1200px-Mercedes-Logo.svg.png',
+        'text': 'mercedes'
+      },
+      {
+        "logo": 'https://justcars.info/blog/bmw-logo-1997-1200x1200.png',
+        'text': 'bmw'
+      },
+      {
+        "logo":
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Nissan-logo.svg/892px-Nissan-logo.svg.png',
+        'text': 'nissan'
+      },
+      {
+        "logo":
+            'https://www.pngall.com/wp-content/uploads/2016/04/Toyota-Logo-Free-Download-PNG.png',
+        'text': 'toyota'
+      },
+    ];
+
     // Print.yellow(FirebaseAuth.instance.currentUser!.email);
 
     return Scaffold(
@@ -93,6 +111,45 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
           child: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              height: 90,
+              width: double.infinity,
+              child: ListView.builder(
+                itemCount: logoBrand.length,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (logoBrand[index]['text'] == 'all') {
+                            stream = FirebaseFirestore.instance
+                                .collection('cars')
+                                .snapshots();
+                          } else {
+                            stream = FirebaseFirestore.instance
+                                .collection('cars')
+                                .where('brand',
+                                    isEqualTo: logoBrand[index]['text'])
+                                .snapshots();
+                          }
+                        });
+                      },
+                      child: Container(
+                          width: 90,
+                          decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: Image.network(logoBrand[index]['logo'])),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
           StreamBuilder<QuerySnapshot>(
               stream: stream,
               builder: (BuildContext context,
@@ -102,7 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text("Loading");
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
 
                 return Expanded(

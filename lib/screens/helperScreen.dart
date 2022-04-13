@@ -17,7 +17,7 @@ class _HelperScreenState extends State<HelperScreen> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       Future.delayed(Duration.zero, () {
-        Navigator.pushReplacementNamed(context, '/register');
+        Navigator.pushReplacementNamed(context, '/onboarding');
       });
     } else {
       Future.delayed(Duration.zero, () {

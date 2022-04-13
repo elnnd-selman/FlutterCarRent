@@ -2,7 +2,9 @@ import 'package:carrent/screens/adminAcceptCarScreen.dart';
 import 'package:carrent/screens/adminCreateCarsScreen.dart';
 import 'package:carrent/screens/helperScreen.dart';
 import 'package:carrent/screens/homeScreen.dart';
+import 'package:carrent/screens/login.dart';
 import 'package:carrent/screens/myAccount.dart';
+import 'package:carrent/screens/onboardingScreen.dart';
 import 'package:carrent/screens/registerScreen.dart';
 import 'package:carrent/screens/registrationCarScreen.dart';
 import 'package:carrent/services/auth.dart';
@@ -44,6 +46,8 @@ class MyApp extends StatelessWidget {
           '/admin-create-car': (context) => AdminCreateCarsScreen(),
           '/my-account': (context) => myAccountScreen(),
           '/admin-accept-car': (context) => AdminAcceptCarScreen(),
+          '/onboarding': (context) => OnboardingSceen(),
+          '/login': (context) => LoginScreen(),
         },
       ),
     );

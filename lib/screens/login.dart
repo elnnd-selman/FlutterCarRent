@@ -3,14 +3,14 @@ import 'package:carrent/widgets/customButton.dart';
 import 'package:carrent/widgets/textInputCustom.dart';
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatefulWidget {
-  RegisterScreen({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePass = false;
   bool loadButton = false;
   String errorText = '';
@@ -27,31 +27,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              Image.network(
+                  'https://ouch-cdn2.icons8.com/jUVsvGx8nL0aKho6aX4TezGZa23zFoFBa9-TszvXULs/rs:fit:256:256/czM6Ly9pY29uczgu/b3VjaC1wcm9kLmFz/c2V0cy9zdmcvNzkw/Lzg2NDVlNDllLTcx/ZDItNDM1NC04YjM5/LWI0MjZkZWI4M2Zk/MS5zdmc.png'),
               Form(
                   key: _globalKey,
                   child: Column(
                     children: [
-                      Container(
-                        child: Image.asset('assets/images/carsRegister.png'),
-                      ),
-                      CustomTextField(
-                        textInputAction: TextInputAction.next,
-                        textInputType: TextInputType.name,
-                        textAlign: TextAlign.left,
-                        text_hint: 'Name',
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'please enter name';
-                          }
-                        },
-                        onSave: (value) {
-                          setState(() {
-                            _userInfo['name'] = value;
-                          });
-                        },
-                        hintTextStyle:
-                            TextStyle(color: Color.fromARGB(255, 91, 91, 91)),
-                      ),
                       CustomTextField(
                         textInputAction: TextInputAction.next,
                         textInputType: TextInputType.name,
@@ -65,26 +46,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onSave: (value) {
                           setState(() {
                             _userInfo['email'] = value;
-                          });
-                        },
-                        hintTextStyle:
-                            TextStyle(color: Color.fromARGB(255, 61, 61, 61)),
-                      ),
-                      CustomTextField(
-                        icon2: Container(
-                            width: 60, child: Center(child: Text('+964'))),
-                        textInputAction: TextInputAction.next,
-                        textInputType: TextInputType.name,
-                        textAlign: TextAlign.left,
-                        text_hint: 'Phone number',
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'please enter Phone number';
-                          }
-                        },
-                        onSave: (value) {
-                          setState(() {
-                            _userInfo['phoneNumber'] = value;
                           });
                         },
                         hintTextStyle:
@@ -122,18 +83,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : CustomButton(
                               fontColor: Colors.white,
                               splashColor: Colors.green,
-                              text: 'register',
+                              text: 'Login',
                               ontab: () async {
                                 if (_globalKey.currentState!.validate()) {
                                   _globalKey.currentState!.save();
                                   setState(() {
                                     loadButton = true;
                                   });
-                                  var response = await AuthService().register(
-                                      phoneNumber: _userInfo['phoneNumber'],
+                                  var response = await AuthService().login(
                                       email: _userInfo['email'],
-                                      password: _userInfo['password'],
-                                      name: _userInfo['name']);
+                                      password: _userInfo['password']);
                                   if (response != null &&
                                       response != 'userAdded') {
                                     var text = response.toString().split(']');

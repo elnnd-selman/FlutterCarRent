@@ -42,8 +42,9 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final credential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+      return 'logined';
     } catch (e) {
       print(e);
       return e;
